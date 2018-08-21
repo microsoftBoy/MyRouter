@@ -1,0 +1,1 @@
+include ':app', ':router-annotation', ':router_compiler', ':router-api'
