@@ -8,7 +8,7 @@ import android.widget.Button;
 import com.example.shuaige.myrouter.facade.annotation.Route;
 import com.example.shuaige.myrouter.launcher.MyRouter;
 
-@Route(path = "/modulea/moduleamain")
+@Route(path = "/modulea/moduleamain",group = "modulea")
 public class ModuleAMainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button button;

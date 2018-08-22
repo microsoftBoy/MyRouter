@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -58,6 +57,7 @@ import static com.example.shuaige.myrouter.compiler.utils.Consts.PACKAGE_OF_GENE
 import static com.example.shuaige.myrouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.SEPARATOR;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.VALUE_ENABLE;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.WARNING_TIPS;
 
 /**
  * Created by ShuaiGe on 2018-08-17.
@@ -67,6 +67,7 @@ import static com.example.shuaige.myrouter.compiler.utils.Consts.VALUE_ENABLE;
 //处理器接收的参数，module名字
 @SupportedOptions(KEY_MODULE_NAME)
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
+//要过滤的注解类
 @SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE})
 public class RouteProcessor extends AbstractProcessor {
 
@@ -85,12 +86,13 @@ public class RouteProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
         super.init(processingEnvironment);
+        logger = new Logger(processingEnvironment.getMessager());
+        logger.info(">>> RouteProcessor init start. <<<");
         mFiler = processingEnvironment.getFiler(); //文件生成器，用于生成class文件
         types = processingEnvironment.getTypeUtils();//type（类信息） 工具类
         elements = processingEnvironment.getElementUtils();//class文件元素（类，属性，方法）工具类
 
-        typeUtils = new TypeUtils(types, elements);//获取真正的Java类型
-        logger = new Logger(processingEnvironment.getMessager());
+        typeUtils = new TypeUtils(types, elements);//获取真正的Java类型，生成javaDoc 用
 
 
         //获取module名称
@@ -99,6 +101,7 @@ public class RouteProcessor extends AbstractProcessor {
             moduleName = options.get(KEY_MODULE_NAME);
             generateDoc = VALUE_ENABLE.equals(options.get(KEY_GENERATE_DOC_NAME));
         }
+
         if (StringUtils.isNotEmpty(moduleName)) {
             moduleName = moduleName.replaceAll("[^0-9a-zA-Z_]+", "");
             logger.info("The user has configuration the module name, it was [" + moduleName + "]");
@@ -127,11 +130,12 @@ public class RouteProcessor extends AbstractProcessor {
             }
         }
 
-        logger.info(">>> RouteProcessor init. <<<");
+        logger.info(">>> RouteProcessor init end. <<<");
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
+        logger.info(">>> RouteProcessor process start. <<<");
         if (CollectionUtils.isNotEmpty(set)) {
             Set<? extends Element> elementsAnnotatedWith = roundEnvironment
                     .getElementsAnnotatedWith(Route.class);
@@ -162,8 +166,13 @@ public class RouteProcessor extends AbstractProcessor {
 
             //router 的接口
             TypeElement type_IRouteGroup = elements.getTypeElement(IROUTE_GROUP);
+
+
             ClassName routeMetaCn = ClassName.get(RouteMeta.class);
             ClassName routeTypeCn = ClassName.get(RouteType.class);
+
+            logger.info(">>> parseRoutes routeElements routeMetaCn = " + routeMetaCn.toString());
+
 
             /**
              * 构造输入类型，比如：
@@ -189,7 +198,7 @@ public class RouteProcessor extends AbstractProcessor {
             ParameterSpec groupParameterSpec = ParameterSpec.builder(inputMapTypeOfGroup, "atlas").build();
 
             /**
-             * 构造‘loadinto’方法
+             * 构造Root的‘loadinto’方法
              */
             MethodSpec.Builder loadIntoMethodOfRootBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
                     .addAnnotation(Override.class)
@@ -205,7 +214,9 @@ public class RouteProcessor extends AbstractProcessor {
                 RouteMeta routeMeta = null;
                 //如果使用了Route的类是activity类型的
                 if (types.isSubtype(tm, type_Activity)) {
-                    logger.info(">>> Found activity route: " + tm.toString() + " <<<");
+                    logger.info(">>> Found activity TypeMirror: " + tm.toString() + " <<<");
+
+                    logger.info(">>> Found activity route: " + route.toString() + " <<<");
 
                     routeMeta = new RouteMeta(route, RouteType.ACTIVITY, element, null);
 
@@ -219,7 +230,7 @@ public class RouteProcessor extends AbstractProcessor {
                 String groupName = entry.getKey();
                 Set<RouteMeta> groupData = entry.getValue();
 
-                //构造loadinto方法
+                //构造Group的"loadinto"方法
                 MethodSpec.Builder loadIntoMethodOfGroupBuilder = MethodSpec.methodBuilder(METHOD_LOAD_INTO)
                         .addAnnotation(Override.class)
                         .addModifiers(Modifier.PUBLIC)
@@ -255,10 +266,11 @@ public class RouteProcessor extends AbstractProcessor {
 
                 }
 
-                //生成组
+                //生成Group类 代码
                 String groupFileName = NAME_OF_GROUP + groupName;
                 JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                         TypeSpec.classBuilder(groupFileName)
+                                .addJavadoc(WARNING_TIPS)
                                 .addSuperinterface(ClassName.get(type_IRouteGroup))
                                 .addMethod(loadIntoMethodOfGroupBuilder.build())
                                 .addModifiers(Modifier.PUBLIC).build()).build().writeTo(mFiler);
@@ -279,10 +291,11 @@ public class RouteProcessor extends AbstractProcessor {
                 }
             }
 
-            //生成root 代码
+            //生成root类 代码
             String rootFileName = NAME_OF_ROOT + SEPARATOR + moduleName;
             JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                     TypeSpec.classBuilder(rootFileName)
+                            .addJavadoc(WARNING_TIPS)
                             .addSuperinterface(ClassName.get(elements.getTypeElement(IROUTE_ROOT)))
                             .addModifiers(Modifier.PUBLIC)
                             .addMethod(loadIntoMethodOfRootBuilder.build())
@@ -300,7 +313,7 @@ public class RouteProcessor extends AbstractProcessor {
      * @param routeMeta
      */
     private void categories(RouteMeta routeMeta) {
-        if (routeVertify(routeMeta)) {
+        if (routeVerify(routeMeta)) {
             logger.info(">>> start categories,group = " + routeMeta.getGroup() + ", path = " + routeMeta.getPath() + " <<<");
             Set<RouteMeta> routeMetas = groupMap.get(routeMeta.getGroup());
             if (CollectionUtils.isEmpty(routeMetas)) {
@@ -330,9 +343,9 @@ public class RouteProcessor extends AbstractProcessor {
 
     }
 
-    private boolean routeVertify(RouteMeta routeMeta) {
+    private boolean routeVerify(RouteMeta routeMeta) {
         String path = routeMeta.getPath();
-        logger.info(">>> routeVertify  path = " + path);
+        logger.info(">>> routeVerify  path = " + path);
         //路径必须以“/”开头
         if (StringUtils.isEmpty(path) || !path.startsWith("/")) {
             return false;
