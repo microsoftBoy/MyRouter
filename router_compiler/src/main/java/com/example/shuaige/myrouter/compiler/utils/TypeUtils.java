@@ -7,17 +7,17 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
-import static com.example.compiler.utils.Consts.BOOLEAN;
-import static com.example.compiler.utils.Consts.BYTE;
-import static com.example.compiler.utils.Consts.INTEGER;
-import static com.example.compiler.utils.Consts.PARCELABLE;
-import static com.example.compiler.utils.Consts.SERIALIZABLE;
-import static com.example.compiler.utils.Consts.SHORT;
-import static com.example.compiler.utils.Consts.LONG;
-import static com.example.compiler.utils.Consts.DOUBEL;
-import static com.example.compiler.utils.Consts.FLOAT;
-import static com.example.compiler.utils.Consts.CHAR;
-import static com.example.compiler.utils.Consts.STRING;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.BOOLEAN;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.BYTE;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.INTEGER;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.PARCELABLE;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.SERIALIZABLE;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.SHORT;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.LONG;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.DOUBEL;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.FLOAT;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.CHAR;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.STRING;
 
 /**
  * Created by ShuaiGe on 2018-08-20.

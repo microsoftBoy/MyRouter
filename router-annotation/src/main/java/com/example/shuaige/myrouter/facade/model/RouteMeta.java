@@ -42,22 +42,22 @@ public class RouteMeta {
                 '}';
     }
 
-    public static RouteMeta build(RouteType type, Class<?> destination, String path, String group, int priority, int extra,Map<String,Integer> paramType) {
-        return  new RouteMeta(type, null, destination, path, group, priority, extra, paramType, null);
+    public static RouteMeta build(RouteType type, Class<?> destination, String path, String group, Map<String, Integer> paramType, int priority, int extra) {
+        return new RouteMeta(type, null, destination, path, group, priority, extra, paramType, null);
 
     }
 
     public static RouteMeta build(RouteType type, Class<?> destination, String path, String group, int priority, int extra) {
-        return  new RouteMeta(type, null, destination, path, group, priority, extra, null, null);
+        return new RouteMeta(type, null, destination, path, group, priority, extra, null, null);
 
     }
 
-    public RouteMeta(Route route,RouteType type, Class<?> destination) {
-        new RouteMeta(type,null,destination,route.path(),route.group(),route.priority(),route.extras(),null,route.name());
+    public RouteMeta(Route route, RouteType type, Class<?> destination) {
+        new RouteMeta(type, null, destination, route.path(), route.group(), route.priority(), route.extras(), null, route.name());
     }
 
-    public RouteMeta(Route route,RouteType type, Element rawType, Map<String, Integer> paramType) {
-        new RouteMeta(type,rawType,null,route.path(),route.group(),route.priority(),route.extras(),paramType,route.name());
+    public RouteMeta(Route route, RouteType type, Element rawType, Map<String, Integer> paramType) {
+        this(type, rawType, null, route.path(), route.group(), route.priority(), route.extras(), paramType, route.name());
     }
 
     public RouteType getType() {

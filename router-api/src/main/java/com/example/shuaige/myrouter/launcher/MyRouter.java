@@ -39,7 +39,7 @@ public final class MyRouter {
     private static Handler mHandler;
     private volatile static ThreadPoolExecutor executor = DefaultPoolExecutor.getInstance();
 
-    protected static synchronized boolean init(Application application) {
+    public static synchronized boolean init(Application application) {
         logger.info(Consts.TAG, "ARouter init start!");
         mContext = application;
         LogisticsCenter.init(application, executor);
@@ -118,10 +118,14 @@ public final class MyRouter {
                 callback.onLost(postcard);
             }
 
-            return _navigation(context, postcard, requestCode, callback);
+            return null;
         }
 
-        return null;
+        if (null != callback){
+            callback.onFound(postcard);
+        }
+
+        return _navigation(context, postcard, requestCode, callback);
 
     }
 

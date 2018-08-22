@@ -52,6 +52,7 @@ import static com.example.shuaige.myrouter.compiler.utils.Consts.IROUTE_ROOT;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.KEY_GENERATE_DOC_NAME;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.KEY_MODULE_NAME;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.METHOD_LOAD_INTO;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.NAME_OF_GROUP;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.NAME_OF_ROOT;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_DOCS;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.PACKAGE_OF_GENERATE_FILE;
@@ -152,6 +153,9 @@ public class RouteProcessor extends AbstractProcessor {
      */
     private void parseRoutes(Set<? extends Element> routeElements) throws IOException {
         if (CollectionUtils.isNotEmpty(routeElements)) {
+
+            logger.info(">>> parseRoutes routeElements size = " + routeElements.size());
+
             rootMap.clear();
 
             TypeMirror type_Activity = elements.getTypeElement(ACTIVITY).asType();
@@ -195,12 +199,17 @@ public class RouteProcessor extends AbstractProcessor {
             for (Element element : routeElements) {
                 TypeMirror tm = element.asType();
                 Route route = element.getAnnotation(Route.class);
+
+                logger.info(">>> Found activity route path: " + route.path() + " <<<");
+                logger.info(">>> Found activity route group: " + route.group() + " <<<");
                 RouteMeta routeMeta = null;
                 //如果使用了Route的类是activity类型的
                 if (types.isSubtype(tm, type_Activity)) {
                     logger.info(">>> Found activity route: " + tm.toString() + " <<<");
 
                     routeMeta = new RouteMeta(route, RouteType.ACTIVITY, element, null);
+
+                    logger.info(">>> Found activity routeMeta: " + routeMeta.toString() + " <<<");
                 }
 
                 categories(routeMeta);
@@ -240,14 +249,14 @@ public class RouteProcessor extends AbstractProcessor {
                             routeMeta.getPath(),
                             routeMetaCn,
                             routeTypeCn,
-                            routeMeta.getDestination(),
+                            className,
                             routeMeta.getPath().toLowerCase(),
                             routeMeta.getGroup().toLowerCase());
 
                 }
 
                 //生成组
-                String groupFileName = NAME_OF_ROOT + groupName;
+                String groupFileName = NAME_OF_GROUP + groupName;
                 JavaFile.builder(PACKAGE_OF_GENERATE_FILE,
                         TypeSpec.classBuilder(groupFileName)
                                 .addSuperinterface(ClassName.get(type_IRouteGroup))
@@ -257,7 +266,7 @@ public class RouteProcessor extends AbstractProcessor {
                 rootMap.put(groupName, groupFileName);
 
             }
-
+            logger.info(">>> Generated group end : " + rootMap.size() + "<<<");
 
             if (MapUtils.isNotEmpty(rootMap)) {
                 for (Map.Entry<String, String> entry :
@@ -316,11 +325,14 @@ public class RouteProcessor extends AbstractProcessor {
             logger.warning(">>> Route meta verify error, group is " + routeMeta.getGroup() + " <<<");
         }
 
+        logger.info(">>> end categories ");
+
 
     }
 
     private boolean routeVertify(RouteMeta routeMeta) {
         String path = routeMeta.getPath();
+        logger.info(">>> routeVertify  path = " + path);
         //路径必须以“/”开头
         if (StringUtils.isEmpty(path) || !path.startsWith("/")) {
             return false;
