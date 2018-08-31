@@ -23,6 +23,7 @@ public class Consts {
 
 
     public static final String ANNOTATION_TYPE_ROUTE = FACADE_PACKAGE+".annotation.Route";
+    public static final String ANNOTATION_TYPE_ROUTETEST = FACADE_PACKAGE+".annotation.RouteTest";
     public static final String PACKAGE_OF_GENERATE_DOCS = "com.example.shuaige.myrouter.docs";
 
     //System interface

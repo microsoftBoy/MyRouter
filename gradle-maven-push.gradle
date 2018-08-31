@@ -1,0 +1,120 @@
+apply plugin: 'com.github.dcendents.android-maven'
+
+version = VERSION_NAME
+group = GROUP
+
+// Bintray
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+def username = properties.getProperty("username")
+def password = properties.getProperty("password")
+
+afterEvaluate { project ->
+    println(TAG + 'afterEvaluate')
+
+    if (project.hasProperty("android")) { // Android libraries
+        task sourcesJar(type: Jar) {
+            classifier = 'sources'
+            from android.sourceSets.main.java.srcDirs
+        }
+
+        task javadoc(type: Javadoc) {
+            source = android.sourceSets.main.java.srcDirs
+            classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        }
+    } else { // Java libraries
+        task sourcesJar(type: Jar, dependsOn: classes) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+    }
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives javadocJar
+        archives sourcesJar
+    }
+
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+
+                repository(url: SNAPSHOT_REPOSITORY_URL) {
+                    authentication(userName: username, password: password)
+                }
+
+                pom.groupId = group
+                pom.artifactId = artifact
+                pom.version = version
+
+                pom.project {
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 生成pom文件的参数
+     */
+    install {
+
+        println(TAG + 'install')
+
+        repositories.mavenInstaller {
+
+            println(TAG + 'mavenInstaller')
+
+            configuration = configurations.archives
+
+            // This generates POM.xml with proper parameters
+            pom.project {
+                packaging 'aar' //打包类型
+                groupId GROUP   //组名
+                artifactId artifact //项目名
+                version version
+
+                // Add your description here
+                name libraryName
+                description libraryDescription
+                url siteUrl //项目地址
+
+                // Set your license
+                licenses {
+                    license {
+                        name licenseName
+                        url licenseUrl
+                    }
+                }
+                developers {
+                    developer {
+                        id developerId
+                        name developerName
+                        email developerEmail
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+
+                }
+
+            }
+
+        }
+    }
+
+
+}

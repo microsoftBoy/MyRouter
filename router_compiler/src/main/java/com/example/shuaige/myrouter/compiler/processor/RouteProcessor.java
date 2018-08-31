@@ -46,6 +46,7 @@ import javax.tools.StandardLocation;
 
 import static com.example.shuaige.myrouter.compiler.utils.Consts.ACTIVITY;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTE;
+import static com.example.shuaige.myrouter.compiler.utils.Consts.ANNOTATION_TYPE_ROUTETEST;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.IROUTE_GROUP;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.IROUTE_ROOT;
 import static com.example.shuaige.myrouter.compiler.utils.Consts.KEY_GENERATE_DOC_NAME;
@@ -68,7 +69,7 @@ import static com.example.shuaige.myrouter.compiler.utils.Consts.WARNING_TIPS;
 @SupportedOptions(KEY_MODULE_NAME)
 @SupportedSourceVersion(SourceVersion.RELEASE_7)
 //要过滤的注解类
-@SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE})
+@SupportedAnnotationTypes({ANNOTATION_TYPE_ROUTE,ANNOTATION_TYPE_ROUTETEST})
 public class RouteProcessor extends AbstractProcessor {
 
     private static final Object TAG = "RouteProcessor";
@@ -133,9 +134,18 @@ public class RouteProcessor extends AbstractProcessor {
         logger.info(">>> RouteProcessor init end. <<<");
     }
 
+    /**
+     *
+     * @param set 包含含有注解字段的注解类信息，如我们使用到的Route类(对应SupportedAnnotationTypes中过滤的注解类)
+     * @param roundEnvironment 包含含有注解字段的原始类信息，如添加了Route注解字段Activity的类
+     * @return
+     */
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         logger.info(">>> RouteProcessor process start. <<<");
+        logger.info(">>> RouteProcessor process set "+set.toString());
+        logger.info(">>> RouteProcessor process roundEnvironment "+roundEnvironment.toString());
+        //set不为空，说明包含有注解字段，
         if (CollectionUtils.isNotEmpty(set)) {
             Set<? extends Element> elementsAnnotatedWith = roundEnvironment
                     .getElementsAnnotatedWith(Route.class);
@@ -206,6 +216,7 @@ public class RouteProcessor extends AbstractProcessor {
                     .addParameter(rootParameterSpec);
 
             for (Element element : routeElements) {
+                logger.info(">>> Found activity element: " + element.toString() + " <<<");
                 TypeMirror tm = element.asType();
                 Route route = element.getAnnotation(Route.class);
 
