@@ -38,8 +38,11 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 
-    annotationProcessor project (':router_compiler')
-    compile project(':router-api')
+//    annotationProcessor project (':router_compiler')
+//    compile project(':router-api')
     compile project(':modulea')
     compile project(':moduleb')
+
+    compile 'com.example.shuaige.myrouter:router-api:1.0.1'
+    annotationProcessor 'com.example.shuaige.myrouter:router-compiler:1.0.1'
 }

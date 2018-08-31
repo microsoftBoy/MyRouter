@@ -49,9 +49,9 @@ afterEvaluate { project ->
                     authentication(userName: username, password: password)
                 }
 
-                pom.groupId = group
+                pom.groupId = GROUP
                 pom.artifactId = artifact
-                pom.version = version
+                pom.version = VERSION_NAME
 
                 pom.project {
                     licenses {

@@ -12,6 +12,12 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [MYROUTER_MODULE_NAME: project.getName()]
+            }
+        }
+
     }
     buildTypes {
         release {
@@ -30,5 +36,7 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:26.+'
     testCompile 'junit:junit:4.12'
-    compile project(':router-annotation')
+//    compile project(':router-annotation')
+    compile 'com.example.shuaige.myrouter:router-annotation:1.0.1'
+    annotationProcessor 'com.example.shuaige.myrouter:router-compiler:1.0.1'
 }

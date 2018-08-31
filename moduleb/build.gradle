@@ -33,9 +33,12 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    annotationProcessor project(':router_compiler')
-    compile project(':router-api')
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
+//    annotationProcessor project(':router_compiler')
+//    compile project(':router-api')
+
+    compile 'com.example.shuaige.myrouter:router-api:1.0.1'
+    annotationProcessor 'com.example.shuaige.myrouter:router-compiler:1.0.1'
 }
